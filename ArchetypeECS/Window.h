@@ -8,13 +8,12 @@
 struct WindowData
 {
 	std::string title;
-	int xPosition;
-	int yPosition;
-	int width;
-	int height;
-	Uint32 flags;
+	int xPosition = 0;
+	int yPosition = 0;
+	int width = 0;
+	int height = 0;
+	Uint32 flags = 0;
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WindowData, title, xPosition, yPosition, width, height, flags);
 
 /// <summary>
 /// Class to wrap window calls in

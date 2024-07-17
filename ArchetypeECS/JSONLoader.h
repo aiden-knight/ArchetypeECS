@@ -1,5 +1,6 @@
 #pragma once
 #include <JSON/nlohmann/json.hpp>
+#include "DefinesJSON.h"
 #include <string>
 /// <summary>
 /// The following is an example of how to create a struct to be serialised into json
