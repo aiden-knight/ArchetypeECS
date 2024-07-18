@@ -16,8 +16,11 @@ namespace ECS
 	// FUNCTIONS
 	public:
 		Table(const Type& previousType, size_t index);
-		void Init(ComponentID changed, size_t previousTable, bool added);
+		void Init(unordered_map<ComponentID, size_t>& componentSizes, ComponentID changed, size_t previousTable, bool added);
 		
+		/// <summary>
+		/// Calls delete[] on all ComponentData buffers, can't be called from Destructor due to Table being stored in vector
+		/// </summary>
 		void DeleteComponents();
 
 		void RemoveEntity(size_t index);
@@ -32,9 +35,10 @@ namespace ECS
 	public:
 		Type type;
 
-		static unordered_map<ComponentID, size_t> ComponentSizes;
-
 	private:
+		/// <summary>
+		/// The index of where the table is stored in the _tables vector in engine class
+		/// </summary>
 		size_t _index;
 
 		vector<EntityRecord*> _records;

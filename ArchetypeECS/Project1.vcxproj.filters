@@ -34,6 +34,12 @@
     <Filter Include="Header Files\SDL">
       <UniqueIdentifier>{c1db6fcb-4e10-4bc6-a684-4a71cdd1ff0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Debugging">
+      <UniqueIdentifier>{8b51a798-ff29-49cc-8c33-e8a579b329f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Debugging">
+      <UniqueIdentifier>{ffc66d74-2943-472a-a6ee-a9e43978d411}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,11 +60,11 @@
     <ClCompile Include="Engine.cpp">
       <Filter>Source Files\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Table.cpp">
       <Filter>Source Files\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files\Debugging</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,7 +116,7 @@
       <Filter>Header Files\JSON</Filter>
     </ClInclude>
     <ClInclude Include="Logger.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Debugging</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

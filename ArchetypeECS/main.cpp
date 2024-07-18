@@ -28,7 +28,6 @@ int main(int argc, char** argv)
 	};
 	ecs.RegisterComponent<Mana>();
 	ecs.RegisterComponent<Health>();
-	ecs.RegisterComponent<float>();
 
 	// create two entities
 	EntityID entity = ecs.Entity();
@@ -39,24 +38,26 @@ int main(int argc, char** argv)
 	Logger::Break();
 
 	// add health components
-	ecs.AddComponent<Health>(entity, {42});
-	ecs.AddComponent<Health>(second, {13});
+	ecs.AddComponent<Health>(entity, { 42 });
+	ecs.AddComponent<Health>(second, { 13 });
 
 	Logger::Log("Health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(entity)->value));
 	Logger::Break();
 
 	// add mana component to only first
-	ecs.AddComponent<Mana>(entity, {-20});
+	ecs.AddComponent<Mana>(entity, { -20 });
 
 
 	Logger::Log("Health value after adding mana: " + std::to_string(ecs.GetComponent<Health>(entity)->value));
 	Logger::Log("Second health value after adding mana: " + std::to_string(ecs.GetComponent<Health>(second)->value));
 
 	Logger::Log("Mana value: " + std::to_string(ecs.GetComponent<Mana>(entity)->value));
-	ecs.AddComponent<float>(entity, { 3.14f });
-
 	Logger::Break();
-	Logger::Log("Float value: " + std::to_string(*ecs.GetComponent<float>(entity)));
+
+	ecs.RemoveComponent<Health>(entity);
+	ecs.GetComponent<Health>(entity);
+	Logger::Log("Mana value after removing health: " + std::to_string(ecs.GetComponent<Mana>(entity)->value));
+	Logger::Log("Second health value after removing health: " + std::to_string(ecs.GetComponent<Health>(second)->value));
 
 	// Initialise
 	bool quit{ !SDL2::Init() };

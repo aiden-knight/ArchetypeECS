@@ -2,17 +2,19 @@
 #include <algorithm>
 #include <cstdlib>
 
+#include "Logger.h"
+
 namespace ECS
 {
-	unordered_map<ComponentID, size_t> Table::ComponentSizes;
-
 	Table::Table(const Type& previousType, size_t index)
 	{
 		type = previousType;
 		_index = index;
 	}
 
-	void Table::Init(ComponentID changed, size_t previousTable, bool added)
+	static int Counter = 0;
+
+	void Table::Init(unordered_map<ComponentID, size_t>& componentSizes, ComponentID changed, size_t previousTable, bool added)
 	{
 		_edges.emplace(changed, previousTable);
 
@@ -22,8 +24,10 @@ namespace ECS
 		// create table's columns
 		for (ComponentID component : type)
 		{
-			_components.emplace(std::make_pair(component, ComponentData(ComponentSizes[component])));
+			_components.emplace(std::make_pair(component, ComponentData(componentSizes[component])));
 		}
+		Counter++;
+		Logger::Log("Table Init called, Counter: " + std::to_string(Counter));
 	}
 
 	void Table::DeleteComponents()
