@@ -3,6 +3,7 @@
 #include "JSONLoader.h"
 
 #include "Engine.h"
+#include "PrintSystem.h"
 
 /// <summary>
 /// Contains the loop for polling SDL events
@@ -18,46 +19,48 @@ int main(int argc, char** argv)
 	using namespace ECS;
 	Engine ecs = Engine();
 
-	struct Health
-	{
-		int value = 100;
-	};
-	struct Mana
-	{
-		int value = 0;
-	};
 	ecs.RegisterComponent<Mana>();
 	ecs.RegisterComponent<Health>();
 
 	// create two entities
-	EntityID entity = ecs.Entity();
+	EntityID first = ecs.Entity();
 	EntityID second = ecs.Entity();
+	EntityID third = ecs.Entity();
 
-	Logger::Log("EntityID (entity): " + std::to_string(entity));
-	Logger::Log("EntityID (second): " + std::to_string(entity));
+	ecs.AddComponent<Health>(3);
+	ecs.AddComponent<float>(first);
 	Logger::Break();
 
 	// add health components
-	ecs.AddComponent<Health>(entity, { 42 });
+	ecs.AddComponent<Health>(first, { 42 });
 	ecs.AddComponent<Health>(second, { 13 });
+	ecs.AddComponent<Health>(third, { 3 });
 
-	Logger::Log("Health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(entity)->value));
+	Logger::Log("Entity 1 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(first)->value));
+	Logger::Log("Entity 2 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(second)->value));
+	Logger::Log("Entity 3 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(third)->value));
+
 	Logger::Break();
 
-	// add mana component to only first
-	ecs.AddComponent<Mana>(entity, { -20 });
+	// add mana component to first and third
+	ecs.AddComponent<Mana>(first, { -20 });
+	ecs.AddComponent<Mana>(third);
 
-
-	Logger::Log("Health value after adding mana: " + std::to_string(ecs.GetComponent<Health>(entity)->value));
-	Logger::Log("Second health value after adding mana: " + std::to_string(ecs.GetComponent<Health>(second)->value));
-
-	Logger::Log("Mana value: " + std::to_string(ecs.GetComponent<Mana>(entity)->value));
+	Logger::Log("Entity 1 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(first)->value));
+	Logger::Log("Entity 2 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(second)->value));
+	Logger::Log("Entity 3 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(third)->value));
 	Logger::Break();
 
-	ecs.RemoveComponent<Health>(entity);
-	ecs.GetComponent<Health>(entity);
-	Logger::Log("Mana value after removing health: " + std::to_string(ecs.GetComponent<Mana>(entity)->value));
-	Logger::Log("Second health value after removing health: " + std::to_string(ecs.GetComponent<Health>(second)->value));
+	Logger::Log("Entity 1 mana value: " + std::to_string(ecs.GetComponent<Mana>(first)->value));
+	ecs.GetComponent<Mana>(second)->value;
+	Logger::Log("Entity 3 mana value: " + std::to_string(ecs.GetComponent<Mana>(third)->value));
+	Logger::Break();
+
+	ecs.RegisterSystem<PrintSystem>();
+
+	ecs.InitSystems();
+	ecs.RunSystems();
+
 
 	// Initialise
 	bool quit{ !SDL2::Init() };

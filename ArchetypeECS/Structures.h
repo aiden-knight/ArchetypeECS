@@ -16,3 +16,12 @@ struct FVector2
 	float x;
 	float y;
 };
+
+struct Health
+{
+	int value = 100;
+};
+struct Mana
+{
+	int value = 0;
+};

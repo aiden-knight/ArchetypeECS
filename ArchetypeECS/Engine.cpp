@@ -1,4 +1,7 @@
 #include "Engine.h"
+#include "System.h"
+
+#include <algorithm>
 
 namespace ECS
 {
@@ -12,6 +15,11 @@ namespace ECS
 		for (Table& table : _tables)
 		{
 			table.DeleteComponents();
+		}
+
+		for (System* system : _systems)
+		{
+			delete system;
 		}
 	}
 
@@ -53,6 +61,39 @@ namespace ECS
 
 		return target;
 	}
+
+	void Engine::InitSystems()
+	{
+		for (System* system : _systems)
+		{
+			system->Init(this);
+		}
+	}
+
+	void Engine::RunSystems()
+	{
+		for (System* system : _systems)
+		{
+			system->Run();
+		}
+	}
+
+	forward_list<Table*> Engine::GetTables(Type subType)
+	{
+		forward_list<Table*> tables;
+
+		for (Table& table : _tables)
+		{
+			// checks if subType is subset of type
+			if (std::includes(table.type.begin(), table.type.end(), subType.begin(), subType.end()))
+			{
+				tables.push_front(&table);
+			}
+		}
+
+		return tables;
+	}
+
 	void Engine::MoveData(ComponentData* target, const size_t datumSize, const EntityRecord* record, const void* source)
 	{
 		// Allocate space for moved component

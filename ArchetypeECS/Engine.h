@@ -2,6 +2,8 @@
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+#include <forward_list>
+#include <type_traits>
 
 #include "Logger.h"
 #include "Table.h"
@@ -13,6 +15,9 @@ namespace ECS
 	typedef unsigned char Buffer;
 	using std::unordered_map;
 	using std::vector;
+	using std::forward_list;
+
+	class System;
 
 	class Engine
 	{
@@ -49,6 +54,20 @@ namespace ECS
 		/// <returns>Pointer to table entity should now belong to</returns>
 		Table* GetTarget(EntityRecord* record, ComponentID component, bool added);
 
+
+		void InitSystems();
+
+		/// <summary>
+		/// Runs systems
+		/// </summary>
+		void RunSystems();
+
+		/// <summary>
+		/// Gets list of tables that have subType as a subset of their type
+		/// </summary>
+		/// <param name="subType">Type looking for</param>
+		/// <returns>Linked list of tables that match</returns>
+		forward_list<Table*> GetTables(Type subType);
 	
 	private:
 		void MoveData(ComponentData* target, const size_t datumSize, const EntityRecord* record, const void* source);
@@ -58,6 +77,7 @@ namespace ECS
 	private:
 		vector<Table> _tables;
 		vector<EntityRecord> _records;
+		vector<System*> _systems;
 
 		/// <summary>
 		/// When a component is registered their size is stored here for table initialisation
@@ -68,6 +88,18 @@ namespace ECS
 
 	// TEMPLATES
 	public:
+		/// <summary>
+		/// Registers system to run in the ECS Engine
+		/// </summary>
+		/// <typeparam name="DerivedSystem">System to register, must derive from class ECS::System</typeparam>
+		template<typename DerivedSystem>
+		void RegisterSystem()
+		{
+			static_assert(std::is_base_of<System, DerivedSystem>::value, "Engine::RegisterSystem called with class not deriving from Sytem");
+			_systems.emplace_back(new DerivedSystem);
+		}
+
+
 		/// <summary>
 		/// Registers type as a component
 		/// </summary>
@@ -124,6 +156,17 @@ namespace ECS
 			return reinterpret_cast<Component*>(componentPos);
 		}
 
+		/// <summary>
+		/// Checks validity of entity and component, also checks components existance
+		/// Used for component operations such as AddComponent and RemoveComponent
+		/// </summary>
+		/// <typeparam name="Component"></typeparam>
+		/// <param name="entity"></param>
+		/// <param name="shouldExist"></param>
+		/// <param name="source"></param>
+		/// <param name="outID"></param>
+		/// <param name="outRecord"></param>
+		/// <returns></returns>
 		template<typename Component>
 		bool CheckComponent(EntityID entity, bool shouldExist, std::string source, ComponentID& outID, EntityRecord* &outRecord)
 		{
@@ -157,7 +200,7 @@ namespace ECS
 		}
 
 		/// <summary>
-		/// Adds component to given entity, moving it to the new correct table.
+		/// Adds component to given entity, then moves entity to correct table.
 		/// </summary>
 		/// <typeparam name="Component">Component type to add</typeparam>
 		/// <param name="entity">EntityID of entity to add component to</param>
@@ -214,6 +257,11 @@ namespace ECS
 			target->AddRecord(record);
 		}
 
+		/// <summary>
+		/// Removes component from given entity, then moves entity to correct table.
+		/// </summary>
+		/// <typeparam name="Component">Component type to remove</typeparam>
+		/// <param name="entity">EntityID of entity to remove component from</param>
 		template<typename Component>
 		void RemoveComponent(EntityID entity)
 		{

@@ -66,6 +66,9 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files\Debugging</Filter>
     </ClCompile>
+    <ClCompile Include="PrintSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\SDL2.lib">
@@ -117,6 +120,12 @@
     </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Header Files\Debugging</Filter>
+    </ClInclude>
+    <ClInclude Include="System.h">
+      <Filter>Header Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintSystem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

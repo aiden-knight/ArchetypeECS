@@ -12,8 +12,6 @@ namespace ECS
 		_index = index;
 	}
 
-	static int Counter = 0;
-
 	void Table::Init(unordered_map<ComponentID, size_t>& componentSizes, ComponentID changed, size_t previousTable, bool added)
 	{
 		_edges.emplace(changed, previousTable);
@@ -26,8 +24,6 @@ namespace ECS
 		{
 			_components.emplace(std::make_pair(component, ComponentData(componentSizes[component])));
 		}
-		Counter++;
-		Logger::Log("Table Init called, Counter: " + std::to_string(Counter));
 	}
 
 	void Table::DeleteComponents()
