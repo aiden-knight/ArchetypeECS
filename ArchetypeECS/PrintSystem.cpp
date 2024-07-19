@@ -23,12 +23,10 @@ void PrintSystem::Run()
 		ComponentData* health =  table->GetComponentData(_owner->GetComponentID<Health>());
 
 		// iterate over components
-		Buffer* healthBuffer = static_cast<Buffer*>(health->data);
-		size_t pos = 0;
-		for (size_t i = 0; i < health->number; i++,	pos += health->datumSize)
+		Health* healthBuffer = reinterpret_cast<Health*>(health->data);
+		for (int i = 0; i < health->number; i++)
 		{
-			Health* component = reinterpret_cast<Health*>(healthBuffer + pos);
-			Logger::Log("{PrintSystem::Run} printing health: " + std::to_string(component->value));
+			Logger::Log("{PrintSystem::Run} printing health: " + std::to_string(healthBuffer[i].value));
 		}
 	}
 }

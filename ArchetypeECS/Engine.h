@@ -67,7 +67,7 @@ namespace ECS
 		/// </summary>
 		/// <param name="subType">Type looking for</param>
 		/// <returns>Linked list of tables that match</returns>
-		forward_list<Table*> GetTables(Type subType);
+		forward_list<Table*> GetTables(Type subType); // @TODO substitute with some sort of query that only checks for new tables if changed?
 	
 	private:
 		void MoveData(ComponentData* target, const size_t datumSize, const EntityRecord* record, const void* source);
@@ -98,7 +98,6 @@ namespace ECS
 			static_assert(std::is_base_of<System, DerivedSystem>::value, "Engine::RegisterSystem called with class not deriving from Sytem");
 			_systems.emplace_back(new DerivedSystem);
 		}
-
 
 		/// <summary>
 		/// Registers type as a component

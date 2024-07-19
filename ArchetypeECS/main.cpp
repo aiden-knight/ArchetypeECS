@@ -52,7 +52,15 @@ int main(int argc, char** argv)
 	Logger::Break();
 
 	Logger::Log("Entity 1 mana value: " + std::to_string(ecs.GetComponent<Mana>(first)->value));
-	ecs.GetComponent<Mana>(second)->value;
+	if (Mana* mana = ecs.GetComponent<Mana>(second))
+	{
+		Logger::Log("Entity 2 mana value: " + std::to_string(mana->value));
+	}
+	else
+	{
+		Logger::Log("Entity 2 mana was nullptr");
+	}
+	
 	Logger::Log("Entity 3 mana value: " + std::to_string(ecs.GetComponent<Mana>(third)->value));
 	Logger::Break();
 
@@ -61,6 +69,9 @@ int main(int argc, char** argv)
 	ecs.InitSystems();
 	ecs.RunSystems();
 
+	[](Health& h) {
+		Logger::Log(std::to_string(h.value));
+		};
 
 	// Initialise
 	bool quit{ !SDL2::Init() };
