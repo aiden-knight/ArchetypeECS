@@ -31,6 +31,9 @@ namespace ECS
 		ComponentData* GetComponentData(ComponentID component);
 		void AddRecord(EntityRecord* record);
 
+		size_t GetComponentAmount();
+		EntityID GetEntity(size_t index);
+
 	// VARIABLES
 	public:
 		Type type;

@@ -13,8 +13,10 @@ namespace ECS
 	public:
 		size_t table;
 		size_t tableIndex;
+		const EntityID entity;
 
-		EntityRecord(size_t table)
+		EntityRecord(EntityID entity, size_t table) :
+			entity{entity}
 		{
 			this->table = table;
 			tableIndex = -1;

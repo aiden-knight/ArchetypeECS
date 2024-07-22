@@ -4,7 +4,7 @@
 
 #include "Engine.h"
 #include "PrintSystem.h"
-#include "Temp.h"
+#include "VariadicSystem.h"
 
 /// <summary>
 /// Contains the loop for polling SDL events
@@ -70,12 +70,30 @@ int main(int argc, char** argv)
 	ecs.InitSystems();
 
 	ecs.RunSystems();
-	ecs.TestSystem<Health>().Each(
+	Logger::Break();
+
+	// create system for health components
+	auto healthSystem = ecs.GetVariadicSystem<Health>();
+
+	// double all health values
+	healthSystem.Each(
 		[](Health& h)
 		{
 			h.value *= 2;
 		});
-	ecs.RunSystems();
+
+	// print all health values
+	healthSystem.Each(
+		[](Health& h)
+		{
+			Logger::Log(std::to_string(h.value));
+		});
+	Logger::Break();
+
+	ecs.GetVariadicSystem<Health, Mana>().Each([](Health& h, Mana& m)
+		{
+			Logger::Log("Has both health and mana (Health: " + std::to_string(h.value) + ", Mana: " + std::to_string(m.value) + ")");
+		});
 
 	// Initialise
 	bool quit{ !SDL2::Init() };

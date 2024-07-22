@@ -15,13 +15,20 @@ namespace ECS
 	// the types of components a table or entity has
 	typedef std::set<ComponentID> Type;
 
-
+	/// <summary>
+	/// Static helper class to generate unique IDs for components
+	/// </summary>
+	/// <typeparam name="T">The type that acts as a component</typeparam>
 	template <typename Component>
 	class StaticID
 	{
 	public:
 		static constexpr ComponentID null = std::numeric_limits<ComponentID>::max();
 
+		/// <summary>
+		/// Generates a unique ID for component
+		/// </summary>
+		/// <returns>Generated ID</returns>
 		static ComponentID Init()
 		{
 			if (_typeID == null)
@@ -31,6 +38,10 @@ namespace ECS
 			return _typeID;
 		}
 
+		/// <summary>
+		/// Gets the ID of the component
+		/// </summary>
+		/// <returns>The components ID, or StaticID<Component>::null if it hasn't been initialised</returns>
 		static ComponentID GetID() { return _typeID; }
 	private:
 		static ComponentID _typeID;

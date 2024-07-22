@@ -21,7 +21,7 @@ namespace ECS
 	class System;
 
 	template <typename... Component>
-	class TempSystem;
+	class VariadicSystem;
 
 	class Engine
 	{
@@ -103,14 +103,10 @@ namespace ECS
 			_systems.emplace_back(new DerivedSystem);
 		}
 
-		
-
 		template<typename... Component>
-		TempSystem<Component...> TestSystem()
+		VariadicSystem<Component...> GetVariadicSystem()
 		{
-			TempSystem<Component...> system{};
-			system.engine = this;
-			return system;
+			return VariadicSystem<Component...>(this);
 		}
 
 		/// <summary>

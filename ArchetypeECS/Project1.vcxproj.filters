@@ -127,8 +127,8 @@
     <ClInclude Include="PrintSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Temp.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="VariadicSystem.h">
+      <Filter>Header Files\ECS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

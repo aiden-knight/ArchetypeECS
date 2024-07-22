@@ -86,4 +86,16 @@ namespace ECS
 		record->table = _index;
 		_records.push_back(record);
 	}
+
+	size_t Table::GetComponentAmount()
+	{
+		return _records.size();
+	}
+
+	EntityID Table::GetEntity(size_t index)
+	{
+		if (index >= _records.size()) return -1;
+
+		return _records[index]->entity;
+	}
 }

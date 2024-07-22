@@ -25,12 +25,14 @@ namespace ECS
 
 	EntityID Engine::Entity()
 	{
+		EntityID newEntity = _nextID++;
+
 		// create record for new entity and add it to empty table
-		_records.emplace_back(0);
+		_records.emplace_back(newEntity, 0);
 		_tables[0].AddRecord(&_records.back());
 
 		// return entity id generated
-		return _nextID++;
+		return newEntity;
 	}
 
 	uint64_t Engine::EntityCount()
