@@ -18,10 +18,10 @@ namespace ECS
 	using std::vector;
 	using std::forward_list;
 
-	class System;
+	class BaseSystem;
 
 	template <typename... Component>
-	class VariadicSystem;
+	class System;
 
 	class Engine
 	{
@@ -58,9 +58,6 @@ namespace ECS
 		/// <returns>Pointer to table entity should now belong to</returns>
 		Table* GetTarget(EntityRecord* record, ComponentID component, bool added);
 
-
-		void InitSystems();
-
 		/// <summary>
 		/// Runs systems
 		/// </summary>
@@ -81,7 +78,8 @@ namespace ECS
 	private:
 		vector<Table> _tables;
 		vector<EntityRecord> _records;
-		vector<System*> _systems;
+
+		vector<BaseSystem*> _systems;
 
 		/// <summary>
 		/// When a component is registered their size is stored here for table initialisation
@@ -93,20 +91,26 @@ namespace ECS
 	// TEMPLATES
 	public:
 		/// <summary>
-		/// Registers system to run in the ECS Engine
+		/// Gets a temporary system for user to call System::Each on
 		/// </summary>
-		/// <typeparam name="DerivedSystem">System to register, must derive from class ECS::System</typeparam>
-		template<typename DerivedSystem>
-		void RegisterSystem()
+		/// <returns></returns>
+		template<typename... Component>
+		System<Component...> GetSystem()
 		{
-			static_assert(std::is_base_of<System, DerivedSystem>::value, "Engine::RegisterSystem called with class not deriving from Sytem");
-			_systems.emplace_back(new DerivedSystem);
+			return System<Component...>(this);
 		}
 
+		/// <summary>
+		/// Registers system of type that will be called on Engine::RunSystems
+		/// Will also be deleted in Engine::~Engine
+		/// </summary>
+		/// <returns>Pointer to the created system to call System::Init with function to run</returns>
 		template<typename... Component>
-		VariadicSystem<Component...> GetVariadicSystem()
+		System<Component...>* RegisterSystem()
 		{
-			return VariadicSystem<Component...>(this);
+			auto temp = new System<Component...>(this);
+			_systems.push_back(temp);
+			return temp;
 		}
 
 		/// <summary>

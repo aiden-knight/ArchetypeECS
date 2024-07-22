@@ -17,7 +17,7 @@ namespace ECS
 			table.DeleteComponents();
 		}
 
-		for (System* system : _systems)
+		for (BaseSystem* system : _systems)
 		{
 			delete system;
 		}
@@ -64,17 +64,9 @@ namespace ECS
 		return target;
 	}
 
-	void Engine::InitSystems()
-	{
-		for (System* system : _systems)
-		{
-			system->Init(this);
-		}
-	}
-
 	void Engine::RunSystems()
 	{
-		for (System* system : _systems)
+		for (BaseSystem* system : _systems)
 		{
 			system->Run();
 		}

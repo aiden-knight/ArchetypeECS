@@ -3,8 +3,7 @@
 #include "JSONLoader.h"
 
 #include "Engine.h"
-#include "PrintSystem.h"
-#include "VariadicSystem.h"
+#include "System.h"
 
 /// <summary>
 /// Contains the loop for polling SDL events
@@ -65,15 +64,17 @@ int main(int argc, char** argv)
 	Logger::Log("Entity 3 mana value: " + std::to_string(ecs.GetComponent<Mana>(third)->value));
 	Logger::Break();
 
-	ecs.RegisterSystem<PrintSystem>();
-
-	ecs.InitSystems();
+	ecs.RegisterSystem<Health>()->Init(
+		[](Health& h)
+		{
+			Logger::Log("Print System: " + std::to_string(h.value));
+		});
 
 	ecs.RunSystems();
 	Logger::Break();
 
 	// create system for health components
-	auto healthSystem = ecs.GetVariadicSystem<Health>();
+	auto healthSystem = ecs.GetSystem<Health>();
 
 	// double all health values
 	healthSystem.Each(
@@ -83,14 +84,11 @@ int main(int argc, char** argv)
 		});
 
 	// print all health values
-	healthSystem.Each(
-		[](Health& h)
-		{
-			Logger::Log(std::to_string(h.value));
-		});
+
+	ecs.RunSystems();
 	Logger::Break();
 
-	ecs.GetVariadicSystem<Health, Mana>().Each([](Health& h, Mana& m)
+	ecs.GetSystem<Health, Mana>().Each([](Health& h, Mana& m)
 		{
 			Logger::Log("Has both health and mana (Health: " + std::to_string(h.value) + ", Mana: " + std::to_string(m.value) + ")");
 		});
