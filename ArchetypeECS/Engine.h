@@ -4,6 +4,7 @@
 #include <cstring>
 #include <forward_list>
 #include <type_traits>
+#include <tuple>
 
 #include "Logger.h"
 #include "Table.h"
@@ -18,6 +19,9 @@ namespace ECS
 	using std::forward_list;
 
 	class System;
+
+	template <typename... Component>
+	class TempSystem;
 
 	class Engine
 	{
@@ -97,6 +101,16 @@ namespace ECS
 		{
 			static_assert(std::is_base_of<System, DerivedSystem>::value, "Engine::RegisterSystem called with class not deriving from Sytem");
 			_systems.emplace_back(new DerivedSystem);
+		}
+
+		
+
+		template<typename... Component>
+		TempSystem<Component...> TestSystem()
+		{
+			TempSystem<Component...> system{};
+			system.engine = this;
+			return system;
 		}
 
 		/// <summary>

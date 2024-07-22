@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "PrintSystem.h"
+#include "Temp.h"
 
 /// <summary>
 /// Contains the loop for polling SDL events
@@ -67,11 +68,14 @@ int main(int argc, char** argv)
 	ecs.RegisterSystem<PrintSystem>();
 
 	ecs.InitSystems();
-	ecs.RunSystems();
 
-	[](Health& h) {
-		Logger::Log(std::to_string(h.value));
-		};
+	ecs.RunSystems();
+	ecs.TestSystem<Health>().Each(
+		[](Health& h)
+		{
+			h.value *= 2;
+		});
+	ecs.RunSystems();
 
 	// Initialise
 	bool quit{ !SDL2::Init() };
