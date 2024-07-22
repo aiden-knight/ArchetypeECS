@@ -5,6 +5,8 @@
 #include "Engine.h"
 #include "System.h"
 
+#include <random>
+
 /// <summary>
 /// Contains the loop for polling SDL events
 /// </summary>
@@ -14,84 +16,34 @@ bool PollEvents();
 void Update();
 void Render(Renderer& renderer);
 
+using namespace ECS;
+Engine ecs = Engine();
+
 int main(int argc, char** argv)
 {
-	using namespace ECS;
-	Engine ecs = Engine();
+	ecs.RegisterComponent<Position>();
+	ecs.RegisterComponent<Colour>();
+	ecs.RegisterComponent<Extents>();
 
-	ecs.RegisterComponent<Mana>();
-	ecs.RegisterComponent<Health>();
-
-	// create two entities
-	EntityID first = ecs.Entity();
-	EntityID second = ecs.Entity();
-	EntityID third = ecs.Entity();
-
-	ecs.AddComponent<Health>(3);
-	ecs.AddComponent<float>(first);
-	Logger::Break();
-
-	// add health components
-	ecs.AddComponent<Health>(first, { 42 });
-	ecs.AddComponent<Health>(second, { 13 });
-	ecs.AddComponent<Health>(third, { 3 });
-
-	Logger::Log("Entity 1 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(first)->value));
-	Logger::Log("Entity 2 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(second)->value));
-	Logger::Log("Entity 3 health value before adding mana: " + std::to_string(ecs.GetComponent<Health>(third)->value));
-
-	Logger::Break();
-
-	// add mana component to first and third
-	ecs.AddComponent<Mana>(first, { -20 });
-	ecs.AddComponent<Mana>(third);
-
-	Logger::Log("Entity 1 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(first)->value));
-	Logger::Log("Entity 2 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(second)->value));
-	Logger::Log("Entity 3 health value after adding mana to entity 1 and 3: " + std::to_string(ecs.GetComponent<Health>(third)->value));
-	Logger::Break();
-
-	Logger::Log("Entity 1 mana value: " + std::to_string(ecs.GetComponent<Mana>(first)->value));
-	if (Mana* mana = ecs.GetComponent<Mana>(second))
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> colourDist(0, 255);
+	for (int i = 0; i < 16; i++)
 	{
-		Logger::Log("Entity 2 mana value: " + std::to_string(mana->value));
+		for (int j = 0; j < 16; j++)
+		{
+			EntityID test = ecs.Entity();
+			ecs.AddComponent<Position>(test, { 25 + i*50.f, 25 + j*50.f });
+			ecs.AddComponent<Extents>(test, { 50, 50 });
+
+			Colour colour;
+			colour.r = colourDist(rng);
+			colour.g = colourDist(rng);
+			colour.b = colourDist(rng);
+			colour.a = 255;
+			ecs.AddComponent<Colour>(test, std::move(colour));
+		}
 	}
-	else
-	{
-		Logger::Log("Entity 2 mana was nullptr");
-	}
-	
-	Logger::Log("Entity 3 mana value: " + std::to_string(ecs.GetComponent<Mana>(third)->value));
-	Logger::Break();
-
-	ecs.RegisterSystem<Health>()->Init(
-		[](Health& h)
-		{
-			Logger::Log("Print System: " + std::to_string(h.value));
-		});
-
-	ecs.RunSystems();
-	Logger::Break();
-
-	// create system for health components
-	auto healthSystem = ecs.GetSystem<Health>();
-
-	// double all health values
-	healthSystem.Each(
-		[](Health& h)
-		{
-			h.value *= 2;
-		});
-
-	// print all health values
-
-	ecs.RunSystems();
-	Logger::Break();
-
-	ecs.GetSystem<Health, Mana>().Each([](Health& h, Mana& m)
-		{
-			Logger::Log("Has both health and mana (Health: " + std::to_string(h.value) + ", Mana: " + std::to_string(m.value) + ")");
-		});
 
 	// Initialise
 	bool quit{ !SDL2::Init() };
@@ -107,6 +59,7 @@ int main(int argc, char** argv)
 	{
 		// store pointers to renderer and window in case components need them
 		SDL2::StorePointers(&renderer, &window);
+		renderer.SetClearColour({ 0, 0, 0, 255 });
 	}
 
 	// Game Loop
@@ -160,7 +113,11 @@ void Render(Renderer& renderer)
 {
 	renderer.Clear();
 
-
+	ecs.GetSystem<Position, Extents, Colour>().Each(
+		[](Position& p, Extents& e, Colour& c) 
+		{
+			SDL2::GetRenderer()->DrawRect(p.value, e.value, c);
+		});
 
 	renderer.Present();
 }

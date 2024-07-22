@@ -17,11 +17,12 @@ struct FVector2
 	float y;
 };
 
-struct Health
+struct Position
 {
-	int value = 100;
+	FVector2 value{ 0, 0 };
 };
-struct Mana
+
+struct Extents
 {
-	int value = 0;
+	FVector2 value{ 0, 0 };
 };
