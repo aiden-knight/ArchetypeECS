@@ -91,34 +91,39 @@ namespace ECS
 	void Engine::MoveData(ComponentData* target, const size_t datumSize, const EntityRecord* record, const void* source)
 	{
 		// Allocate space for moved component
-		size_t targetCount = target->number * datumSize;
-		Buffer* tempTargetData = new Buffer[targetCount + datumSize];
-		std::memcpy(tempTargetData, target->data, targetCount);
-		delete[] target->data;
-		target->data = nullptr;
+		if(target->number == target->allocated)
+		{
+			size_t targetCount = target->number * datumSize;
+			Buffer* tempTargetData = new Buffer[targetCount + datumSize * ComponentData::AllocSize];
+			std::memcpy(tempTargetData, target->data, targetCount);
+			delete[] target->data;
+			target->data = nullptr;
+
+			target->data = tempTargetData;
+			target->allocated += ComponentData::AllocSize;
+
+			Logger::Log("Allocated more memory, amount: " + std::to_string(target->allocated));
+		}
 
 		// move old component
-		std::memcpy(tempTargetData + targetCount, source, datumSize);
+		Buffer* targetPos = static_cast<Buffer*>(target->data) + target->number * datumSize;
+		std::memcpy(targetPos, source, datumSize);
 
 		// update component data values
 		target->number++;
-		target->data = tempTargetData;
 	}
 
 	void Engine::RemoveData(ComponentData* source, const size_t datumSize, const size_t offset, const Buffer* position)
 	{
 		// Realloc source data
-		size_t newSourceSize = (source->number - 1) * datumSize;
-		Buffer* tempSourceData = new Buffer[newSourceSize];
-		//	DEST: temp				SRC: start of source				SIZE: data up to record's component
-		std::memcpy(tempSourceData, source->data, offset);
-		//	DEST: temp + offset		SRC: just after source component	SIZE: data after record component to end
-		std::memcpy(tempSourceData + offset, position + datumSize, newSourceSize - offset);
-		delete[] source->data;
-		source->data = nullptr;
+		size_t sourceSize = source->allocated * datumSize;
+		Buffer* sourceBuffer = static_cast<Buffer*>(source->data);
+		//	DEST: source			SRC: start of source				SIZE: data up to record's component
+		std::memcpy(sourceBuffer, source->data, offset);
+		//	DEST: source + offset	SRC: just after source component	SIZE: data after record component to end
+		std::memcpy(sourceBuffer + offset, position + datumSize, sourceSize - offset);
 
 		// update component data values
 		source->number--;
-		source->data = tempSourceData;
 	}
 }

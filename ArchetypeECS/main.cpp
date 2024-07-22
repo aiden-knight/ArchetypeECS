@@ -24,26 +24,38 @@ int main(int argc, char** argv)
 	ecs.RegisterComponent<Position>();
 	ecs.RegisterComponent<Colour>();
 	ecs.RegisterComponent<Extents>();
+	ecs.RegisterComponent<Rect>();
 
 	std::random_device dev;
 	std::mt19937 rng(dev());
 	std::uniform_int_distribution<std::mt19937::result_type> colourDist(0, 255);
-	for (int i = 0; i < 16; i++)
+
+	float squareSize = 1;
+	for (int i = 0; i < 800/squareSize; i++)
 	{
-		for (int j = 0; j < 16; j++)
+		for (int j = 0; j < 800 / squareSize; j++)
 		{
 			EntityID test = ecs.Entity();
-			ecs.AddComponent<Position>(test, { 25 + i*50.f, 25 + j*50.f });
-			ecs.AddComponent<Extents>(test, { 50, 50 });
 
-			Colour colour;
-			colour.r = colourDist(rng);
-			colour.g = colourDist(rng);
-			colour.b = colourDist(rng);
-			colour.a = 255;
-			ecs.AddComponent<Colour>(test, std::move(colour));
+			Rect rect{
+				{ squareSize / 2 + i * squareSize, squareSize / 2 + j * squareSize },
+				{ squareSize, squareSize },
+				{
+					((800 / squareSize) - i) / (800 / squareSize) * 255,
+					0,
+					((800 / squareSize) - j) / (800 / squareSize) * 255,
+					255
+				}
+			};
+			ecs.AddComponent<Rect>(test, std::move(rect));
 		}
 	}
+
+	ecs.RegisterSystem<Rect>()->Init(
+		[](Rect& rect)
+		{
+			rect.colour.r -= 1;
+		});
 
 	// Initialise
 	bool quit{ !SDL2::Init() };
@@ -99,12 +111,20 @@ bool PollEvents()
 	return false;
 }
 
+static Uint64 accumulator = 0;
+
 void Update()
 {
 	static Uint64 previousTime;
 	Uint64 deltaTime = SDL_GetTicks64() - previousTime;
 
-
+	Logger::Log("Delta Time: " + std::to_string(deltaTime));
+	accumulator += deltaTime;
+	if (accumulator >= 50)
+	{
+		ecs.RunSystems();
+		accumulator -= 50;
+	}
 
 	previousTime = SDL_GetTicks64();
 }
@@ -113,10 +133,10 @@ void Render(Renderer& renderer)
 {
 	renderer.Clear();
 
-	ecs.GetSystem<Position, Extents, Colour>().Each(
-		[](Position& p, Extents& e, Colour& c) 
+	ecs.GetSystem<Rect>().Each(
+		[](Rect& rect) 
 		{
-			SDL2::GetRenderer()->DrawRect(p.value, e.value, c);
+			SDL2::GetRenderer()->DrawRect(rect.pos.value, rect.extents.value, rect.colour);
 		});
 
 	renderer.Present();

@@ -26,3 +26,10 @@ struct Extents
 {
 	FVector2 value{ 0, 0 };
 };
+
+struct Rect
+{
+	Position pos;
+	Extents extents;
+	Colour colour;
+};
