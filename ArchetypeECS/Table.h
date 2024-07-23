@@ -16,7 +16,7 @@ namespace ECS
 	// FUNCTIONS
 	public:
 		Table(const Type& previousType, size_t index);
-		void Init(unordered_map<ComponentID, size_t>& componentSizes, ComponentID changed, size_t previousTable, bool added);
+		void Init(unordered_map<ComponentID, ComponentInfo>& componentInfos, ComponentID changed, size_t previousTable, bool added);
 		
 		/// <summary>
 		/// Calls delete[] on all ComponentData buffers, can't be called from Destructor due to Table being stored in vector

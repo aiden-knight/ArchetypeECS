@@ -24,26 +24,6 @@ int windowWidth;
 
 int main(int argc, char** argv)
 {
-	ecs.RegisterComponent<Pixel>();
-
-	uint8_t threadNumber = 16;
-	ecs.RegisterSystem<Pixel>(threadNumber)->Init(
-		[](Pixel& pixel)
-		{
-			pixel.colour.r -= 1;
-			pixel.colour.b -= 1;
-		});
-	ecs.RegisterSystem<Pixel>(threadNumber)->Init(
-		[](Pixel& pixel)
-		{
-			FVector2& fpos = pixel.pos.value;
-			int pos = 3 * (fpos.y * windowWidth + fpos.x);
-
-			TextureBuffer[pos + 0] = pixel.colour.r;
-			TextureBuffer[pos + 1] = pixel.colour.g;
-			TextureBuffer[pos + 2] = pixel.colour.b;
-		});
-
 	// Initialise
 	bool quit{ !SDL2::Init() };
 
@@ -63,6 +43,26 @@ int main(int argc, char** argv)
 		// store pointers to renderer and window in case components need them
 		SDL2::StorePointers(&renderer, &window);
 		renderer.SetClearColour({ 0, 0, 0, 255 });
+
+		ecs.RegisterComponent<Pixel>(windowWidth * windowHeight);
+
+		uint8_t threadNumber = 16;
+		ecs.RegisterSystem<Pixel>(threadNumber)->Init(
+			[](Pixel& pixel)
+			{
+				pixel.colour.r -= 1;
+				pixel.colour.b -= 1;
+			});
+		ecs.RegisterSystem<Pixel>(threadNumber)->Init(
+			[](Pixel& pixel)
+			{
+				FVector2& fpos = pixel.pos.value;
+				int pos = 3 * (fpos.y * windowWidth + fpos.x);
+
+				TextureBuffer[pos + 0] = pixel.colour.r;
+				TextureBuffer[pos + 1] = pixel.colour.g;
+				TextureBuffer[pos + 2] = pixel.colour.b;
+			});
 
 		for (float x = 0; x < windowWidth; x++)
 		{

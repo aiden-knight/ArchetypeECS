@@ -12,7 +12,7 @@ namespace ECS
 		_index = index;
 	}
 
-	void Table::Init(unordered_map<ComponentID, size_t>& componentSizes, ComponentID changed, size_t previousTable, bool added)
+	void Table::Init(unordered_map<ComponentID, ComponentInfo>& componentInfos, ComponentID changed, size_t previousTable, bool added)
 	{
 		_edges.emplace(changed, previousTable);
 
@@ -22,7 +22,8 @@ namespace ECS
 		// create table's columns
 		for (ComponentID component : type)
 		{
-			_components.emplace(std::make_pair(component, ComponentData(componentSizes[component])));
+			ComponentInfo& info = componentInfos[component];
+			_components.emplace(std::make_pair(component, ComponentData(info.datumSize, info.allocSize)));
 		}
 	}
 

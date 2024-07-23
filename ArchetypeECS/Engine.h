@@ -9,6 +9,7 @@
 #include "Logger.h"
 #include "Table.h"
 #include "ComponentID.h"
+#include "Component.h"
 #include "Entity.h"
 
 namespace ECS
@@ -84,7 +85,7 @@ namespace ECS
 		/// <summary>
 		/// When a component is registered their size is stored here for table initialisation
 		/// </summary>
-		unordered_map<ComponentID, size_t> _componentSizes;
+		unordered_map<ComponentID, ComponentInfo> _componentInfos;
 
 		EntityID _nextID = 0;
 
@@ -119,10 +120,10 @@ namespace ECS
 		/// <typeparam name="Component">Type of component to register</typeparam>
 		/// <returns>The generated component ID</returns>
 		template<typename Component>
-		ComponentID RegisterComponent()
+		ComponentID RegisterComponent(size_t allocSize = 100)
 		{
 			ComponentID createdID = StaticID<Component>::Init();
-			_componentSizes.emplace(createdID, sizeof(Component));
+			_componentInfos.emplace(createdID, ComponentInfo(sizeof(Component), allocSize));
 			return createdID;
 		}
 		

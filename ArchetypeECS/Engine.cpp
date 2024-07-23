@@ -51,7 +51,7 @@ namespace ECS
 			size_t index = _tables.size();
 			_tables.emplace_back(_tables[record->table].type, index);
 			target = &_tables.back();
-			target->Init(_componentSizes, component, record->table, added);
+			target->Init(_componentInfos, component, record->table, added);
 
 			// add table to edge of previous table
 			_tables[record->table].AddEdge(component, index);
@@ -94,13 +94,13 @@ namespace ECS
 		if(target->number == target->allocated)
 		{
 			size_t targetCount = target->number * datumSize;
-			Buffer* tempTargetData = new Buffer[targetCount + datumSize * ComponentData::AllocSize];
+			Buffer* tempTargetData = new Buffer[targetCount + datumSize * target->allocSize];
 			std::memcpy(tempTargetData, target->data, targetCount);
 			delete[] target->data;
 			target->data = nullptr;
 
 			target->data = tempTargetData;
-			target->allocated += ComponentData::AllocSize;
+			target->allocated += target->allocSize;
 
 			Logger::Log("Allocated more memory, amount: " + std::to_string(target->allocated));
 		}
