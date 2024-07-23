@@ -17,6 +17,8 @@ void Render(Renderer& renderer);
 using namespace ECS;
 Engine ecs = Engine();
 char* TextureBuffer;
+SDL_Surface* surface;
+
 int windowHeight;
 int windowWidth;
 
@@ -46,6 +48,7 @@ int main(int argc, char** argv)
 		windowHeight = data.height;
 		windowWidth = data.width;
 		TextureBuffer = new char[3 * windowWidth * windowHeight];
+		surface = SDL_CreateRGBSurfaceFrom(TextureBuffer, windowWidth, windowHeight, 24, windowWidth * 3, 0, 0, 0, 0);
 		// store pointers to renderer and window in case components need them
 		SDL2::StorePointers(&renderer, &window);
 		renderer.SetClearColour({ 0, 0, 0, 255 });
@@ -85,6 +88,7 @@ int main(int argc, char** argv)
 
 	// Quit and destruct
 	SDL2::Quit();
+	SDL_FreeSurface(surface);
 	delete[] TextureBuffer;
 	return 0;
 }
@@ -134,9 +138,7 @@ void Render(Renderer& renderer)
 			TextureBuffer[pos+2] = pixel.colour.b;
 		});
 
-	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(TextureBuffer, windowWidth, windowHeight, 24, windowWidth * 3, 0, 0, 0, 0);
+	
 	SDL_BlitSurface(surface, NULL, SDL_GetWindowSurface(SDL2::GetWindow()->_windowPtr.get()), NULL);
-	SDL_FreeSurface(surface);
-
 	SDL_UpdateWindowSurface(SDL2::GetWindow()->_windowPtr.get());
 }
