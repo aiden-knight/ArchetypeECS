@@ -48,7 +48,7 @@ namespace ECS
 		/// Gets the current amount of entity's
 		/// </summary>
 		/// <returns></returns>
-		uint64_t EntityCount();
+		uint64_t EntityCount() const;
 
 		/// <summary>
 		/// Get's the table the entity should move into given component to add or remove

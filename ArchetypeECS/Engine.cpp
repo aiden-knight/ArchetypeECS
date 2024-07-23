@@ -35,7 +35,7 @@ namespace ECS
 		return newEntity;
 	}
 
-	uint64_t Engine::EntityCount()
+	uint64_t Engine::EntityCount() const
 	{
 		return _nextID + 1;
 	}
