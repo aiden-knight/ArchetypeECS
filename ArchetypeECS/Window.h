@@ -27,6 +27,6 @@ public:
 
 	bool CreateRenderer(Renderer& renderer, int index, Uint32 flags) const;
 
-private:
+//private:
 	const SDL2::WindowPtr _windowPtr;
 };

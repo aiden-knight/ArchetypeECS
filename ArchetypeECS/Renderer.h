@@ -41,20 +41,27 @@ public:
 	/// <param name="width">width of texture</param>
 	/// <param name="height">height of texture</param>
 	void DrawTexture(FVector2 pos, SDL2::TexturePtr& texture, int width, int height);
+	void DrawTexture(SDL2::TexturePtr& texture);
 	void DrawRect(FVector2 pos, FVector2 extents, Colour colour);
+	void DrawPoint(FVector2 pos, Colour colour);
 
 	/// <summary>
 	/// Creates texture from given surface
 	/// </summary>
 	SDL2::TexturePtr CreateTextureFromSurface(SDL2::SurfacePtr& surface);
 
-private:
-	SDL2::RendererPtr _rendererPtr; // can't be const or breaks move operator
-	Colour _clearColour;
+	SDL2::TexturePtr CreateTexture(Uint32 format, int access, int w, int h);
+
+	void SetRenderTarget(SDL2::TexturePtr& texture);
+	void ClearRenderTarget();
 
 	/// <summary>
 	/// Sets current render draw colour
 	/// </summary>
 	/// <param name="colour">Colour to set to</param>
 	void SetDrawColour(Colour colour) const;
+
+private:
+	SDL2::RendererPtr _rendererPtr; // can't be const or breaks move operator
+	Colour _clearColour;
 };

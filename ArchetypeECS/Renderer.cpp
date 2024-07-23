@@ -45,6 +45,11 @@ void Renderer::DrawTexture(FVector2 pos, SDL2::TexturePtr& texture, int width, i
 	SDL_RenderCopyExF(_rendererPtr.get(), texture.get(), nullptr, &dest, 0.0f, nullptr, SDL_FLIP_NONE);
 }
 
+void Renderer::DrawTexture(SDL2::TexturePtr& texture)
+{
+	SDL_RenderCopyEx(_rendererPtr.get(), texture.get(), nullptr, nullptr, 0.0, nullptr, SDL_FLIP_NONE);
+}
+
 void Renderer::DrawRect(FVector2 pos, FVector2 extents, Colour colour)
 {
 	SDL_FRect rect{ pos.x - extents.x/2, pos.y - extents.y/2, extents.x, extents.y };
@@ -52,9 +57,30 @@ void Renderer::DrawRect(FVector2 pos, FVector2 extents, Colour colour)
 	SDL_RenderFillRectF(_rendererPtr.get(), &rect);
 }
 
+void Renderer::DrawPoint(FVector2 pos, Colour colour)
+{
+	SetDrawColour(colour);
+	SDL_RenderDrawPoint(_rendererPtr.get(), pos.x, pos.y);
+}
+
 SDL2::TexturePtr Renderer::CreateTextureFromSurface(SDL2::SurfacePtr& surface)
 {
 	return SDL2::TexturePtr(SDL_CreateTextureFromSurface(_rendererPtr.get(), surface.get()));
+}
+
+SDL2::TexturePtr Renderer::CreateTexture(Uint32 format, int access, int w, int h)
+{
+	return SDL2::TexturePtr(SDL_CreateTexture(_rendererPtr.get(), format, access, w, h));
+}
+
+void Renderer::SetRenderTarget(SDL2::TexturePtr& texture)
+{
+	SDL_SetRenderTarget(_rendererPtr.get(), texture.get());
+}
+
+void Renderer::ClearRenderTarget()
+{
+	SDL_SetRenderTarget(_rendererPtr.get(), nullptr);
 }
 
 void Renderer::SetDrawColour(Colour colour) const

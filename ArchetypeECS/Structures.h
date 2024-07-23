@@ -33,3 +33,9 @@ struct Rect
 	Extents extents;
 	Colour colour;
 };
+
+struct Pixel
+{
+	Position pos;
+	Colour colour;
+};

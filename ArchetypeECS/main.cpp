@@ -5,8 +5,6 @@
 #include "Engine.h"
 #include "System.h"
 
-#include <random>
-
 /// <summary>
 /// Contains the loop for polling SDL events
 /// </summary>
@@ -18,43 +16,19 @@ void Render(Renderer& renderer);
 
 using namespace ECS;
 Engine ecs = Engine();
+char* TextureBuffer;
+int windowHeight;
+int windowWidth;
 
 int main(int argc, char** argv)
 {
-	ecs.RegisterComponent<Position>();
-	ecs.RegisterComponent<Colour>();
-	ecs.RegisterComponent<Extents>();
-	ecs.RegisterComponent<Rect>();
+	ecs.RegisterComponent<Pixel>();
 
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_int_distribution<std::mt19937::result_type> colourDist(0, 255);
-
-	float squareSize = 1;
-	for (int i = 0; i < 800/squareSize; i++)
-	{
-		for (int j = 0; j < 800 / squareSize; j++)
+	ecs.RegisterSystem<Pixel>()->Init(
+		[](Pixel& pixel)
 		{
-			EntityID test = ecs.Entity();
-
-			Rect rect{
-				{ squareSize / 2 + i * squareSize, squareSize / 2 + j * squareSize },
-				{ squareSize, squareSize },
-				{
-					((800 / squareSize) - i) / (800 / squareSize) * 255,
-					0,
-					((800 / squareSize) - j) / (800 / squareSize) * 255,
-					255
-				}
-			};
-			ecs.AddComponent<Rect>(test, std::move(rect));
-		}
-	}
-
-	ecs.RegisterSystem<Rect>()->Init(
-		[](Rect& rect)
-		{
-			rect.colour.r -= 1;
+			pixel.colour.r -= 1;
+			pixel.colour.b -= 1;
 		});
 
 	// Initialise
@@ -69,9 +43,31 @@ int main(int argc, char** argv)
 	// Create game objects
 	if (!quit)
 	{
+		windowHeight = data.height;
+		windowWidth = data.width;
+		TextureBuffer = new char[3 * windowWidth * windowHeight];
 		// store pointers to renderer and window in case components need them
 		SDL2::StorePointers(&renderer, &window);
 		renderer.SetClearColour({ 0, 0, 0, 255 });
+
+		for (float x = 0; x < windowWidth; x++)
+		{
+			for (float y = 0; y < windowHeight; y++)
+			{
+				EntityID test = ecs.Entity();
+
+				Pixel pixel{
+					{ x, y },
+					{
+						((windowWidth - x) / windowWidth) * 255,
+						0,
+						((windowHeight - y) / windowHeight) * 255,
+						255
+					}
+				};
+				ecs.AddComponent<Pixel>(test, std::move(pixel));
+			}
+		}
 	}
 
 	// Game Loop
@@ -89,6 +85,7 @@ int main(int argc, char** argv)
 
 	// Quit and destruct
 	SDL2::Quit();
+	delete[] TextureBuffer;
 	return 0;
 }
 
@@ -111,33 +108,35 @@ bool PollEvents()
 	return false;
 }
 
-static Uint64 accumulator = 0;
-
 void Update()
 {
-	static Uint64 previousTime;
+	static Uint64 previousTime = SDL_GetTicks64();
 	Uint64 deltaTime = SDL_GetTicks64() - previousTime;
 
-	Logger::Log("Delta Time: " + std::to_string(deltaTime));
-	accumulator += deltaTime;
-	if (accumulator >= 50)
-	{
-		ecs.RunSystems();
-		accumulator -= 50;
-	}
+	Logger::Log("deltaTime: " + std::to_string(deltaTime));
+	ecs.RunSystems();
 
 	previousTime = SDL_GetTicks64();
 }
 
+
+
 void Render(Renderer& renderer)
 {
-	renderer.Clear();
-
-	ecs.GetSystem<Rect>().Each(
-		[](Rect& rect) 
+	ecs.GetSystem<Pixel>().Each(
+		[](Pixel& pixel)
 		{
-			SDL2::GetRenderer()->DrawRect(rect.pos.value, rect.extents.value, rect.colour);
+			FVector2& fpos = pixel.pos.value;
+			int pos = 3 * (fpos.y * windowWidth + fpos.x);
+
+			TextureBuffer[pos+0] = pixel.colour.r;
+			TextureBuffer[pos+1] = pixel.colour.g;
+			TextureBuffer[pos+2] = pixel.colour.b;
 		});
 
-	renderer.Present();
+	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(TextureBuffer, windowWidth, windowHeight, 24, windowWidth * 3, 0, 0, 0, 0);
+	SDL_BlitSurface(surface, NULL, SDL_GetWindowSurface(SDL2::GetWindow()->_windowPtr.get()), NULL);
+	SDL_FreeSurface(surface);
+
+	SDL_UpdateWindowSurface(SDL2::GetWindow()->_windowPtr.get());
 }

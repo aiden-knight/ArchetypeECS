@@ -2,6 +2,8 @@
 #include "Engine.h"
 #include "Component.h"
 
+#include <thread>
+
 namespace ECS
 {
 	class BaseSystem
@@ -54,13 +56,48 @@ namespace ECS
 				size_t compAmount = table->GetComponentAmount();
 
 				// get buffers for all components
-				auto buffers = std::make_tuple(reinterpret_cast<Component*>(table->GetComponentData(StaticID<Component>::GetID())->data) ...);
+				std::tuple<Component*...> buffers = std::make_tuple(reinterpret_cast<Component*>(table->GetComponentData(StaticID<Component>::GetID())->data) ...);
 				
 				// call function with all components in table
-				for (size_t i = 0; i < compAmount; i++)
+				//LoopCall(lambda, buffers, 0, compAmount);
+
+				uint8_t threadAmount = 16;
+
+				size_t section = compAmount / threadAmount;
+				
+				size_t nextStart = 0;
+				vector<std::thread> threads;
+				for (uint8_t i = 0; i < threadAmount; i++)
 				{
-					lambda(*std::get<Component*>(buffers)++ ...); // dereference component buffer then increment
+					size_t nextEnd = nextStart + section;
+					if (nextEnd > compAmount)
+					{
+						nextEnd = compAmount;
+					}
+
+					threads.emplace_back(&System<Component...>::LoopCall, this, lambda, buffers, nextStart, nextEnd);
+
+					nextStart = nextEnd;
 				}
+				
+				for (std::thread& thread : threads)
+				{
+					thread.join();
+				}
+			}
+		}
+
+	private:
+		void LoopCall(void (*lambda)(Component&...), std::tuple<Component*...> buffers, size_t start, size_t end)
+		{
+			([&]
+				{
+					std::get<Component*>(buffers) += start;
+				} (), ...);
+
+			for (size_t i = start; i < end; i++)
+			{
+				lambda(*std::get<Component*>(buffers)++ ...);
 			}
 		}
 	};
