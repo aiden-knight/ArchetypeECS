@@ -95,9 +95,9 @@ namespace ECS
 		/// </summary>
 		/// <returns></returns>
 		template<typename... Component>
-		System<Component...> GetSystem()
+		System<Component...> GetSystem(uint8_t threadNumber = 1)
 		{
-			return System<Component...>(this);
+			return System<Component...>(this, threadNumber);
 		}
 
 		/// <summary>
@@ -106,9 +106,9 @@ namespace ECS
 		/// </summary>
 		/// <returns>Pointer to the created system to call System::Init with function to run</returns>
 		template<typename... Component>
-		System<Component...>* RegisterSystem()
+		System<Component...>* RegisterSystem(uint8_t threadNumber = 1)
 		{
-			auto temp = new System<Component...>(this);
+			auto temp = new System<Component...>(this, threadNumber);
 			_systems.push_back(temp);
 			return temp;
 		}

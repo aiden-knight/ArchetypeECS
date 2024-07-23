@@ -19,15 +19,16 @@ namespace ECS
 	private:
 		Engine* _engine;
 		const Type _type;
-
+		uint8_t _threadNumber;
 		void (*_lambda)(Component&...);
 
 	public:
-		System(Engine* engine) :
+		System(Engine* engine, uint8_t threadNumber) :
 			_type{ StaticID<Component>::GetID() ... }
 		{
 			_engine = engine;
 			_lambda = nullptr;
+			_threadNumber = threadNumber;
 		}
 
 		virtual void Run() final
@@ -58,16 +59,13 @@ namespace ECS
 				// get buffers for all components
 				std::tuple<Component*...> buffers = std::make_tuple(reinterpret_cast<Component*>(table->GetComponentData(StaticID<Component>::GetID())->data) ...);
 				
-				// call function with all components in table
-				//LoopCall(lambda, buffers, 0, compAmount);
-
-				uint8_t threadAmount = 16;
-
-				size_t section = compAmount / threadAmount;
+				// get size of each thread section
+				size_t section = compAmount / _threadNumber;
 				
+				// start a thread for each section
 				size_t nextStart = 0;
 				vector<std::thread> threads;
-				for (uint8_t i = 0; i < threadAmount; i++)
+				for (uint8_t i = 0; i < _threadNumber; i++)
 				{
 					size_t nextEnd = nextStart + section;
 					if (nextEnd > compAmount)
@@ -80,6 +78,7 @@ namespace ECS
 					nextStart = nextEnd;
 				}
 				
+				// ensure all threads are finished before continuing
 				for (std::thread& thread : threads)
 				{
 					thread.join();

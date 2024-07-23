@@ -26,11 +26,22 @@ int main(int argc, char** argv)
 {
 	ecs.RegisterComponent<Pixel>();
 
-	ecs.RegisterSystem<Pixel>()->Init(
+	uint8_t threadNumber = 16;
+	ecs.RegisterSystem<Pixel>(threadNumber)->Init(
 		[](Pixel& pixel)
 		{
 			pixel.colour.r -= 1;
 			pixel.colour.b -= 1;
+		});
+	ecs.RegisterSystem<Pixel>(threadNumber)->Init(
+		[](Pixel& pixel)
+		{
+			FVector2& fpos = pixel.pos.value;
+			int pos = 3 * (fpos.y * windowWidth + fpos.x);
+
+			TextureBuffer[pos + 0] = pixel.colour.r;
+			TextureBuffer[pos + 1] = pixel.colour.g;
+			TextureBuffer[pos + 2] = pixel.colour.b;
 		});
 
 	// Initialise
@@ -116,29 +127,15 @@ void Update()
 {
 	static Uint64 previousTime = SDL_GetTicks64();
 	Uint64 deltaTime = SDL_GetTicks64() - previousTime;
+	previousTime = SDL_GetTicks64();
 
 	Logger::Log("deltaTime: " + std::to_string(deltaTime));
 	ecs.RunSystems();
 
-	previousTime = SDL_GetTicks64();
 }
-
-
 
 void Render(Renderer& renderer)
 {
-	ecs.GetSystem<Pixel>().Each(
-		[](Pixel& pixel)
-		{
-			FVector2& fpos = pixel.pos.value;
-			int pos = 3 * (fpos.y * windowWidth + fpos.x);
-
-			TextureBuffer[pos+0] = pixel.colour.r;
-			TextureBuffer[pos+1] = pixel.colour.g;
-			TextureBuffer[pos+2] = pixel.colour.b;
-		});
-
-	
 	SDL_BlitSurface(surface, NULL, SDL_GetWindowSurface(SDL2::GetWindow()->_windowPtr.get()), NULL);
 	SDL_UpdateWindowSurface(SDL2::GetWindow()->_windowPtr.get());
 }
