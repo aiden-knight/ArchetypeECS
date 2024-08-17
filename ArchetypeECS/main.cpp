@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
 		ecs.RegisterComponent<Pixel>(windowWidth * windowHeight);
 
-		uint8_t threadNumber = 16;
+		uint8_t threadNumber = 4;
 		ecs.RegisterSystem<Pixel>(threadNumber)->Init(
 			[](Pixel& pixel)
 			{

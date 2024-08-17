@@ -171,23 +171,23 @@ namespace ECS
 		}
 
 		/// <summary>
-		/// Checks validity of entity and component, also checks components existance
+		/// Checks validity of entity and component, also checks component's existance
 		/// Used for component operations such as AddComponent and RemoveComponent
 		/// </summary>
 		/// <typeparam name="Component"></typeparam>
 		/// <param name="entity"></param>
 		/// <param name="shouldExist"></param>
-		/// <param name="source"></param>
+		/// <param name="callerFunction"></param>
 		/// <param name="outID"></param>
 		/// <param name="outRecord"></param>
 		/// <returns></returns>
 		template<typename Component>
-		bool CheckComponent(EntityID entity, bool shouldExist, std::string source, ComponentID& outID, EntityRecord* &outRecord)
+		bool CheckComponent(EntityID entity, bool shouldExist, const char* callerFunction, ComponentID& outID, EntityRecord* &outRecord)
 		{
 			// check if entity record exists
 			if (_records.size() <= entity)
 			{
-				Logger::Warning("Entity record not found {" + source + "}");
+				Logger::Warning("Entity record not found {" + std::string(callerFunction) + "}");
 				return false;
 			}
 
@@ -195,7 +195,7 @@ namespace ECS
 			outID = GetComponentID<Component>();
 			if (outID == StaticID<Component>::null)
 			{
-				Logger::Warning("Component not registered {" + source + "}");
+				Logger::Warning("Component not registered {" + std::string(callerFunction) + "}");
 				return false;
 			}
 
@@ -206,7 +206,7 @@ namespace ECS
 			if (_tables[outRecord->table].type.count(outID) != shouldExist)
 			{
 				std::string exist = shouldExist ? "true" : "false";
-				Logger::Warning("Component existance error, should exist = " + exist + " {" + source + "}");
+				Logger::Warning("Component existance error, should exist = " + exist + " {" + std::string(callerFunction) + "}");
 				return false;
 			}
 
@@ -226,9 +226,9 @@ namespace ECS
 			EntityRecord* record = nullptr;
 
 			// check for validity of operation
-			if (!CheckComponent<Component>(entity, false, "Engine::AddComponent", componentID, record))
+			constexpr char debugValue[] = "Engine::AddComponent";
+			if (!CheckComponent<Component>(entity, false, debugValue, componentID, record))
 				return;
-
 
 			// get the table the entity needs to move to
 			Table* target = GetTarget(record, componentID, true);
@@ -283,7 +283,8 @@ namespace ECS
 			EntityRecord* record = nullptr;
 
 			// check for validity of operation
-			if (!CheckComponent<Component>(entity, true, "Engine::RemoveComponent", componentID, record))
+			constexpr char debugValue[] = "Engine::RemoveComponent";
+			if (!CheckComponent<Component>(entity, true, debugValue, componentID, record))
 				return;
 
 			// get the table the entity needs to move to
