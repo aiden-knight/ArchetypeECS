@@ -2,16 +2,11 @@ Whilst exploring methods for creating cache friendly code, I looked into ECS arc
 
 The main features of the Archetype ECS were:
 
-Templated variadic system that takes user provided functions (lambdas) to run on entities with relevant components.
-
-Templated component system with static ID generation.
-
-Custom memory management using type erasure to store components in tables.
-
-Table edges for quick add and remove component operations.
-
-Multi-threading to speed up system running.
-
-Runs at over 60fps with over 5 million entities on tested PCs.
+ - Templated variadic system that takes user provided functions (lambdas) to run on entities with relevant components.
+ - Templated component system with static ID generation.
+ - Custom memory management using type erasure to store components in tables.
+ - Table edges for quick add and remove component operations.
+ - Multi-threading to speed up system running.
+ - Runs at over 60fps with over 5 million entities on tested PCs.
 
 Alongside this the project currently renders an SDL2 window based off of loaded JSON values of width and height. This window surface is blitted to with pixels that are stored as components in the ECS and the SDL2 types are wrapped in smart pointers for memory safety and unique ownership guarantee.
